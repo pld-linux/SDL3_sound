@@ -1,20 +1,19 @@
 # TODO: system libmodplug, timidity?
 Summary:	An abstract soundfile decoder
 Summary(pl.UTF-8):	Abstrakcyjny dekoder plików dźwiękowych
-Name:		SDL2_sound
-Version:	2.0.6
+Name:		SDL3_sound
+Version:	3.2.0
 Release:	1
 License:	Zlib
 Group:		Libraries
 #Source0Download: https://github.com/icculus/SDL_sound/releases
 Source0:	https://github.com/icculus/SDL_sound/archive/v%{version}/SDL_sound-%{version}.tar.gz
-# Source0-md5:	f6147a2debd050599fda3fd3424297bb
+# Source0-md5:	11848f4f8fcf4f1c6f728abde824fa18
 Patch0:		SDL_sound-use-builtin-clz.patch
 URL:		http://www.icculus.org/SDL_sound/
-BuildRequires:	SDL2-devel >= 2.0
-BuildRequires:	cmake >= 3.0
-Requires:	SDL2 >= 2.0
-Obsoletes:	SDL_sound-play < 2
+BuildRequires:	SDL3-devel >= 3.0
+BuildRequires:	cmake >= 3.16
+Requires:	SDL3 >= 3.0
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -43,25 +42,12 @@ pojedynczy wskaźnik do całości zdekodowanych danych. SDL_sound może
 także obsługiwać w locie konwersję częstotliwości próbkowania, formatu
 dźwięku i liczby kanałów.
 
-%package play
-Summary:	SDL_sound/physfs based music player
-Summary(pl.UTF-8):	Odtwarzacz muzyki oparty na SDL_sound/physfs
-Group:		Applications/Sound
-Requires:	%{name} = %{version}-%{release}
-Requires:	physfs >= 3
-
-%description play
-SDL_sound/physfs based music player.
-
-%description play -l pl.UTF-8
-Odtwarzacz muzyki oparty na SDL_sound/physfs.
-
 %package devel
 Summary:	Header files and more to develop SDL_sound applications
 Summary(pl.UTF-8):	Pliki nagłówkowe do tworzenia aplikacji z użyciem SDL_sound
 Group:		Development/Libraries
 Requires:	%{name} = %{version}-%{release}
-Requires:	SDL2-devel >= 2.0
+Requires:	SDL3-devel >= 3.0
 
 %description devel
 Header files and more to develop SDL_sound applications.
@@ -86,18 +72,18 @@ Statyczne biblioteki SDL_sound.
 %patch -P0 -p1
 
 %build
-install -d build 
-cd build
-%cmake .. \
+%cmake -B build \
 	-DSDLSOUND_DECODER_MIDI=ON
 
-%{__make}
+%{__make} -C build
 
 %install
 rm -rf $RPM_BUILD_ROOT
 
 %{__make} -C build install \
 	DESTDIR=$RPM_BUILD_ROOT
+
+%{__mv} $RPM_BUILD_ROOT%{_bindir}/playsound{,-sdl3}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -108,17 +94,17 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(644,root,root,755)
 %doc LICENSE.txt README.md docs/{CHANGELOG,CREDITS}.txt
-%attr(755,root,root) %{_bindir}/playsound
-%{_libdir}/libSDL2_sound.so.*.*.*
-%ghost %{_libdir}/libSDL2_sound.so.2
+%attr(755,root,root) %{_bindir}/playsound-sdl3
+%{_libdir}/libSDL3_sound.so.*.*.*
+%ghost %{_libdir}/libSDL3_sound.so.0
 
 %files devel
 %defattr(644,root,root,755)
-%{_libdir}/libSDL2_sound.so
-%{_includedir}/SDL2/SDL_sound.h
-%{_pkgconfigdir}/SDL2_sound.pc
-%{_libdir}/cmake/SDL2_sound
+%{_libdir}/libSDL3_sound.so
+%{_includedir}/SDL3_sound
+%{_pkgconfigdir}/sdl3-sound.pc
+%{_libdir}/cmake/SDL3_sound
 
 %files static
 %defattr(644,root,root,755)
-%{_libdir}/libSDL2_sound.a
+%{_libdir}/libSDL3_sound.a
