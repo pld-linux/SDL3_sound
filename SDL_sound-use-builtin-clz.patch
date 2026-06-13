@@ -1,14 +1,22 @@
---- SDL_sound-2.0.4/src/dr_flac.h.orig	2025-02-03 20:05:04.840755751 +0100
-+++ SDL_sound-2.0.4/src/dr_flac.h	2025-02-03 20:09:07.742773171 +0100
-@@ -2797,25 +2797,7 @@ static DRFLAC_INLINE drflac_uint32 drfla
+--- SDL_sound-2.0.6/src/dr_flac.h.orig	2026-06-07 18:40:24.000000000 +0200
++++ SDL_sound-2.0.6/src/dr_flac.h	2026-06-13 21:28:43.939619070 +0200
+@@ -2716,34 +2716,7 @@ static DRFLAC_INLINE drflac_uint32 drfla
      #endif
  #else
      #if defined(__GNUC__) || defined(__clang__)
 -        #if defined(DRFLAC_X64)
 -            {
+-                /*
+-                A note on lzcnt.
+-
+-                We check for the presence of the lzcnt instruction at runtime before calling this function, but we still generate this code. I have had
+-                a report where the assembler does not recognize the lzcnt instruction. To work around this we are going to use `rep; bsr` instead which
+-                has an identical byte encoding as lzcnt, and should hopefully improve compatibility with older assemblers.
+-                */
 -                drflac_uint64 r;
 -                __asm__ __volatile__ (
--                    "lzcnt{ %1, %0| %0, %1}" : "=r"(r) : "r"(x) : "cc"
+-                    "rep; bsr{q %1, %0| %0, %1}" : "=r"(r) : "r"(x) : "cc"
+-                    /*"lzcnt{ %1, %0| %0, %1}" : "=r"(r) : "r"(x) : "cc"*/
 -                );
 -
 -                return (drflac_uint32)r;
@@ -17,13 +25,14 @@
 -            {
 -                drflac_uint32 r;
 -                __asm__ __volatile__ (
--                    "lzcnt{l %1, %0| %0, %1}" : "=r"(r) : "r"(x) : "cc"
+-                    "rep; bsr{l %1, %0| %0, %1}" : "=r"(r) : "r"(x) : "cc"
+-                    /*"lzcnt{l %1, %0| %0, %1}" : "=r"(r) : "r"(x) : "cc"*/
 -                );
 -
 -                return r;
 -            }
--        #elif defined(DRFLAC_ARM) && (defined(__ARM_ARCH) && __ARM_ARCH >= 5) && !defined(__ARM_ARCH_6M__) && !defined(DRFLAC_64BIT)   /* <-- I haven't tested 64-bit inline assembly, so only enabling this for the 32-bit build for now. */
-+        #if defined(DRFLAC_ARM) && (defined(__ARM_ARCH) && __ARM_ARCH >= 5) && !defined(__ARM_ARCH_6M__) && !defined(DRFLAC_64BIT)   /* <-- I haven't tested 64-bit inline assembly, so only enabling this for the 32-bit build for now. */
+-        #elif defined(DRFLAC_ARM) && (defined(__ARM_ARCH) && __ARM_ARCH >= 5) && !defined(__ARM_ARCH_6M__) && !(defined(__thumb__) && !defined(__thumb2__)) && !defined(DRFLAC_64BIT)   /* <-- I haven't tested 64-bit inline assembly, so only enabling this for the 32-bit build for now. */
++        #if defined(DRFLAC_ARM) && (defined(__ARM_ARCH) && __ARM_ARCH >= 5) && !defined(__ARM_ARCH_6M__) && !(defined(__thumb__) && !defined(__thumb2__)) && !defined(DRFLAC_64BIT)   /* <-- I haven't tested 64-bit inline assembly, so only enabling this for the 32-bit build for now. */
              {
                  unsigned int r;
                  __asm__ __volatile__ (
